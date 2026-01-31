@@ -21,3 +21,4 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+// deployment verified locally\n
