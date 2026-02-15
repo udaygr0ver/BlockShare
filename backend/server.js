@@ -66,3 +66,41 @@ app.post("/upload", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// 2. Retrieval API (Checks access)
+app.get("/file/:index", async (req, res) => {
+  try {
+    const { index } = req.params;
+    const { userAddress, signature } = req.query;
+
+    if (!verifyAuth(userAddress, signature)) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const signer = await provider.getSigner(userAddress);
+    const contract = getContract(signer);
+
+    const allowed = await contract.hasAccess(index, userAddress);
+    if (!allowed) {
+      return res.status(403).json({ error: "Access Denied" });
+    }
+
+    // Log Access (Tx to emit event)
+    try {
+        const tx = await contract.logAccess(index, userAddress);
+        await tx.wait();
+    } catch (e) {
+        // Fallback if logAccess fails or is not in contract
+    }
+
+    // Send proxy URL to frontend for decryption
+    // Use the request host to make it work on any IP/Domain
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const file = await contract.getFile(index);
+    res.json({ cid: file.hash, downloadUrl: `${protocol}://${host}/download/${file.hash}` });
+  } catch (err) {
+    console.error("Retrieval error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
