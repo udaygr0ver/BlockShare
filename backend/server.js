@@ -104,3 +104,41 @@ app.get("/file/:index", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// 3. Download and Decrypt API
+app.get("/download/:cid", async (req, res) => {
+  try {
+    const { cid } = req.params;
+    const response = await fetch(`http://127.0.0.1:8080/ipfs/${cid}`);
+    const encryptedData = await response.text();
+
+    if (!encryptedData) return res.status(404).send("File not found on IPFS");
+
+    const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+    const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+    res.send(decryptedData);
+  } catch (err) {
+    res.status(500).send("Decryption Error");
+  }
+});
+
+// 4. Share API
+app.post("/share", async (req, res) => {
+  try {
+    const { index, shareWith, userAddress, signature } = req.body;
+
+    if (!verifyAuth(userAddress, signature)) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const signer = await provider.getSigner(userAddress);
+    const contract = getContract(signer);
+
+    const tx = await contract.grantAccess(index, shareWith);
+    await tx.wait();
+
+    res.json({ message: "Access granted successfully", txHash: tx.hash });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
