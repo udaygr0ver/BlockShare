@@ -142,3 +142,35 @@ app.post("/share", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// 5. My Files API
+app.get("/my-files/:userAddress", async (req, res) => {
+  try {
+    let { userAddress } = req.params;
+    const { signature } = req.query;
+
+    if (!verifyAuth(userAddress, signature)) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    userAddress = ethers.getAddress(userAddress);
+    const contract = getContract(provider);
+    
+    let totalFiles = 0;
+    try { totalFiles = await contract.getFileCount(); } catch (e) {}
+
+    const myFiles = [];
+    for (let i = 0; i < totalFiles; i++) {
+      try {
+        const hasAccess = await contract.hasAccess(i, userAddress);
+        if (hasAccess) {
+          const file = await contract.getFile(i);
+          myFiles.push({ index: i, cid: file.hash, name: file.name });
+        }
+      } catch (err) { continue; }
+    }
+    res.json(myFiles);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
