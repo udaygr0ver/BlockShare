@@ -174,3 +174,30 @@ app.get("/my-files/:userAddress", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// 6. Delete API
+app.delete("/delete/:index", async (req, res) => {
+  try {
+    const { index } = req.params;
+    const { userAddress, signature } = req.body;
+
+    if (!verifyAuth(userAddress, signature)) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const signer = await provider.getSigner(userAddress);
+    const contract = getContract(signer);
+
+    const tx = await contract.deleteFile(index);
+    await tx.wait();
+
+    res.json({ message: "Asset deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = 80;
+app.listen(PORT, () => {
+  console.log(`SecureVault Server running on port ${PORT}`);
+});
