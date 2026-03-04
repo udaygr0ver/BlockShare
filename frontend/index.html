@@ -1,1 +1,50 @@
-<!DOCTYPE html><html><head><title>SecureVault</title></head><body></body></html>\n
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault | Encrypted File Sharing</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <h1>SecureVault</h1>
+            </div>
+            <p class="subtitle">Decentralized. Encrypted. Absolute Privacy.</p>
+        </header>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="card hero-card">
+            <div class="metamask-icon-container">
+                <div class="glow"></div>
+                <div class="metamask-icon">🦊</div>
+            </div>
+            <h2>Welcome Back</h2>
+            <p>Connect your wallet to enter your private vault and manage your encrypted assets.</p>
+            <button id="loginBtn" class="btn primary-btn pulse">Connect MetaMask</button>
+            <div id="loginStatus" class="status-msg"></div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" style="display: none;">
+            <div class="dashboard-nav">
+                <div class="user-pill">
+                    <span class="status-dot"></span>
+                    <span id="currentUserAddr" class="addr-text"></span>
+                </div>
+                <button id="logoutBtn" class="btn-icon" title="Logout">Logout</button>
+            </div>
+
+            <div class="card upload-card">
+                <div class="card-header">
+                    <h2>Upload Secure Asset</h2>
+                    <span class="badge">AES-256</span>
+                </div>
+                
+                <div class="upload-area" id="uploadArea">
