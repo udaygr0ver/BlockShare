@@ -48,3 +48,55 @@
                 </div>
                 
                 <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" hidden>
+                    <div class="upload-visual">
+                        <div class="orbit"></div>
+                        <div class="upload-icon">📤</div>
+                    </div>
+                    <div class="upload-text">
+                        <p class="main-text">Drop your file here</p>
+                        <p class="sub-text">or click to browse your computer</p>
+                    </div>
+                    <div id="fileNameDisplay" class="selected-file"></div>
+                </div>
+                <button id="uploadBtn" class="btn primary-btn">
+                    <span class="btn-text">Encrypt & Store on IPFS</span>
+                </button>
+                <div id="uploadStatus" class="status-msg"></div>
+            </div>
+
+            <div class="card files-card">
+                <div class="card-header">
+                    <div class="title-group">
+                        <h2>Your Private Vault</h2>
+                        <span id="fileCountBadge" class="count-badge">0</span>
+                    </div>
+                    <button id="refreshBtn" class="btn-text-action">Refresh Vault</button>
+                </div>
+                
+                <div id="myFilesList" class="files-grid">
+                    <!-- Files will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <h3>Grant Secure Access</h3>
+            <p>Enter the wallet address you want to share this file with.</p>
+            <div class="input-group">
+                <input type="text" id="shareAddress" placeholder="0x...">
+            </div>
+            <div class="modal-actions">
+                <button id="closeModal" class="btn secondary-btn">Cancel</button>
+                <button id="confirmShare" class="btn primary-btn">Grant Access</button>
+            </div>
+            <div id="shareStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
