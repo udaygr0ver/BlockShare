@@ -64,3 +64,70 @@ async function connectWallet() {
         loginBtn.textContent = 'Connect MetaMask';
     }
 }
+
+loginBtn.addEventListener('click', connectWallet);
+
+// Handle Account Changes
+if (window.ethereum) {
+    window.ethereum.on('accountsChanged', () => handleLogout());
+}
+
+function handleLogout() {
+    currentUserAddress = null;
+    currentSignature = null;
+    loginSection.style.display = 'block';
+    dashboardSection.style.display = 'none';
+    myFilesList.innerHTML = '';
+    if (fileNameDisplay) fileNameDisplay.textContent = '';
+    fileInput.value = '';
+    loginStatus.textContent = '';
+    loginBtn.classList.add('pulse');
+}
+
+logoutBtn.addEventListener('click', handleLogout);
+
+// Fetch and Render Files
+async function fetchFiles() {
+    if (!currentUserAddress || !currentSignature) return;
+    
+    myFilesList.innerHTML = '<div class="loading">Scanning Secure Vault...</div>';
+    
+    try {
+        const response = await fetch(`/my-files/${currentUserAddress}?signature=${currentSignature}`);
+        const files = await response.json();
+        
+        if (!response.ok) throw new Error(files.error);
+
+        myFilesList.innerHTML = '';
+        fileCountBadge.textContent = files.length;
+        
+        if (files.length === 0) {
+            myFilesList.innerHTML = '<div class="no-files">Your vault is empty.</div>';
+            return;
+        }
+        
+        files.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <span class="file-icon">📄</span>
+                    <div class="file-details">
+                        <span class="file-name">${file.name || 'Unnamed Asset'}</span>
+                        <span class="file-cid">${file.cid.substring(0, 10)}...${file.cid.substring(file.cid.length - 4)}</span>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button class="action-btn" title="Download" onclick="downloadFile(${file.index}, '${file.name}')">📥</button>
+                    <button class="action-btn" title="Share" onclick="openShareModal(${file.index})">🔗</button>
+                    <button class="action-btn delete" title="Delete" onclick="deleteFile(${file.index})">🗑️</button>
+                </div>
+            `;
+            myFilesList.appendChild(fileItem);
+        });
+    } catch (err) {
+        myFilesList.innerHTML = `<div class="status-msg error">Vault Sync Error: ${err.message}</div>`;
+    }
+}
+
+refreshBtn.addEventListener('click', fetchFiles);
