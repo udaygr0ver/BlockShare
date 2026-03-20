@@ -131,3 +131,60 @@ async function fetchFiles() {
 }
 
 refreshBtn.addEventListener('click', fetchFiles);
+
+// Upload Area Interaction
+uploadArea.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = fileInput.files[0].name;
+    }
+});
+
+// Upload Logic
+uploadBtn.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file) {
+        showStatus(uploadStatus, 'Select an asset to encrypt.', 'error');
+        return;
+    }
+
+    const originalBtnText = uploadBtn.querySelector('.btn-text').textContent;
+    uploadBtn.querySelector('.btn-text').textContent = 'Encrypting & Storing...';
+    uploadBtn.disabled = true;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const fileData = e.target.result;
+        const fileName = file.name;
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    fileData, 
+                    fileName, 
+                    userAddress: currentUserAddress,
+                    signature: currentSignature 
+                })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                showStatus(uploadStatus, `Asset secured successfully!`, 'success');
+                fileInput.value = '';
+                fileNameDisplay.textContent = '';
+                fetchFiles();
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (err) {
+            showStatus(uploadStatus, `Upload Error: ${err.message}`, 'error');
+        } finally {
+            uploadBtn.querySelector('.btn-text').textContent = originalBtnText;
+            uploadBtn.disabled = false;
+        }
+    };
+    reader.readAsDataURL(file);
+});
