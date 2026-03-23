@@ -188,3 +188,48 @@ uploadBtn.addEventListener('click', async () => {
     };
     reader.readAsDataURL(file);
 });
+
+// Download Logic
+async function downloadFile(index, fileName) {
+    try {
+        const response = await fetch(`/file/${index}?userAddress=${currentUserAddress}&signature=${currentSignature}`);
+        const result = await response.json();
+        
+        if (!response.ok) throw new Error(result.error);
+
+        const downloadResp = await fetch(result.downloadUrl);
+        const fileData = await downloadResp.text();
+
+        const link = document.createElement('a');
+        link.href = fileData;
+        link.download = fileName || `secure_asset_${index}`;
+        link.click();
+    } catch (err) {
+        alert(`Decryption failed: ${err.message}`);
+    }
+}
+
+// Delete Logic
+async function deleteFile(index) {
+    if (!confirm('Permanently remove this asset from the blockchain?')) return;
+    
+    try {
+        const response = await fetch(`/delete/${index}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                userAddress: currentUserAddress,
+                signature: currentSignature
+            })
+        });
+        
+        const result = await response.json();
+        if (response.ok) {
+            fetchFiles();
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (err) {
+        alert(`Removal failed: ${err.message}`);
+    }
+}
