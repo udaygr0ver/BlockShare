@@ -233,3 +233,57 @@ async function deleteFile(index) {
         alert(`Removal failed: ${err.message}`);
     }
 }
+
+// Sharing Logic
+function openShareModal(index) {
+    currentShareIndex = index;
+    shareModal.style.display = 'flex';
+    shareAddressInput.value = '';
+    shareStatus.textContent = '';
+}
+
+closeModalBtn.addEventListener('click', () => {
+    shareModal.style.display = 'none';
+});
+
+confirmShareBtn.addEventListener('click', async () => {
+    const targetAddress = shareAddressInput.value.trim();
+    if (!targetAddress.startsWith('0x') || targetAddress.length !== 42) {
+        showStatus(shareStatus, 'Invalid wallet address.', 'error');
+        return;
+    }
+
+    confirmShareBtn.disabled = true;
+    confirmShareBtn.textContent = 'Granting...';
+
+    try {
+        const response = await fetch('/share', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                index: currentShareIndex,
+                shareWith: targetAddress,
+                userAddress: currentUserAddress,
+                signature: currentSignature
+            })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showStatus(shareStatus, 'Access granted successfully!', 'success');
+            setTimeout(() => { shareModal.style.display = 'none'; }, 1500);
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (err) {
+        showStatus(shareStatus, `Share Error: ${err.message}`, 'error');
+    } finally {
+        confirmShareBtn.disabled = false;
+        confirmShareBtn.textContent = 'Grant Access';
+    }
+});
+
+function showStatus(element, message, type) {
+    element.textContent = message;
+    element.className = 'status-msg ' + type;
+}
