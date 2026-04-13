@@ -1,1 +1,0 @@
-# Project Tasks\n- [ ] Smart Contracts\n- [ ] Backend APIs\n- [ ] Frontend App\n- [x] Smart Contracts\n- [ ] Connect IPFS\n- [x] Backend APIs\n
